@@ -31,7 +31,7 @@ const Header = () => {
                     <LinkContainer to='/'>
                         <Navbar.Brand>
                             <FaGlobe className='me-2' />
-                            <span className='fw-semibold'>ExploreEasy</span>
+                            <span className='fw-semibold'>EasyTrip</span>
                         </Navbar.Brand>
                     </LinkContainer>
                     <Navbar.Toggle aria-controls='basic-navbar-nav' />
