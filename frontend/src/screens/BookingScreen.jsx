@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import { setBookingInfo } from '../slices/bookingSlice';
 import { toast } from 'react-toastify';
 import tours from '../tours_list';
+import { calculateTotalPrice, formatPrice } from '../utils/bookingUtils';
 
 const BookingScreen = () => {
     const { id } = useParams();
@@ -28,7 +29,7 @@ const BookingScreen = () => {
         return <Message variant='danger'>Izlet nije pronađen.</Message>;
     }
 
-    const totalPrice = tour.price * numberOfPeople;
+    const totalPrice = calculateTotalPrice(tour.price, numberOfPeople);
 
     const submitHandler = (e) => {
         e.preventDefault();
@@ -123,7 +124,7 @@ const BookingScreen = () => {
                                 <ListGroup.Item>
                                     <Row>
                                         <Col>Cena po osobi:</Col>
-                                        <Col className='text-end'>{tour.price} RSD</Col>
+                                        <Col className='text-end'>{formatPrice(tour.price)}</Col>
                                     </Row>
                                 </ListGroup.Item>
                                 <ListGroup.Item>
@@ -137,7 +138,7 @@ const BookingScreen = () => {
                                         <Col><strong>Ukupno:</strong></Col>
                                         <Col className='text-end'>
                                             <strong className='text-primary'>
-                                                {totalPrice} RSD
+                                                {formatPrice(totalPrice)}
                                             </strong>
                                         </Col>
                                     </Row>

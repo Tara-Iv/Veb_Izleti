@@ -25,6 +25,9 @@ import AboutScreen from './screens/AboutScreen';
 import BookingScreen from './screens/BookingScreen';
 import MyBookingsScreen from './screens/MyBookingsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import AdminToursScreen from './screens/AdminToursScreen';
+import AdminBookingsScreen from './screens/AdminBookingsScreen';
+import AdminUsersScreen from './screens/AdminUsersScreen';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -43,9 +46,9 @@ const router = createBrowserRouter(
             </Route>
 
             <Route path='' element={<AdminRoute />}>
-                <Route path='/admin/tours' element={<HomeScreen />} />
-                <Route path='/admin/bookings' element={<HomeScreen />} />
-                <Route path='/admin/users' element={<HomeScreen />} />
+                <Route path='/admin/tours' element={<AdminToursScreen />} />
+                <Route path='/admin/bookings' element={<AdminBookingsScreen />} />
+                <Route path='/admin/users' element={<AdminUsersScreen />} />
             </Route>
         </Route>
     )

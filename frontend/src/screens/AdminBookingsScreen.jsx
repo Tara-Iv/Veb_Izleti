@@ -1,40 +1,27 @@
 import { Table, Button, Badge } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { FaTrash, FaEye } from 'react-icons/fa';
 import Message from '../components/Message';
-import { clearBookingInfo } from '../slices/bookingSlice';
-import { FaTrash, FaMapMarkerAlt } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { formatDate, formatPrice } from '../utils/bookingUtils';
+import { useNavigate } from 'react-router-dom';
 
-const MyBookingsScreen = () => {
+const AdminBookingsScreen = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-
     const { bookingInfo } = useSelector((state) => state.booking);
 
     const bookings = bookingInfo ? [bookingInfo] : [];
 
-    const cancelHandler = () => {
-        if (window.confirm('Da li ste sigurni da želite da otkažete rezervaciju?')) {
-            dispatch(clearBookingInfo());
-            toast.success('Rezervacija je otkazana.');
+    const deleteHandler = (id) => {
+        if (window.confirm('Da li ste sigurni da želite da obrišete ovu rezervaciju?')) {
+            toast.success('Rezervacija je obrisana.');
         }
     };
 
     return (
         <>
-            <h1 className='mb-4'>Moje rezervacije</h1>
+            <h1 className='mb-4'>Upravljanje rezervacijama</h1>
             {bookings.length === 0 ? (
-                <Message>
-                    Nemate aktivnih rezervacija.{' '}
-                    <span
-                        style={{ cursor: 'pointer', color: 'blue' }}
-                        onClick={() => navigate('/tours')}
-                    >
-                        Pregledajte izlete
-                    </span>
-                </Message>
+                <Message>Nema rezervacija u sistemu.</Message>
             ) : (
                 <Table striped bordered hover responsive>
                     <thead>
@@ -52,13 +39,12 @@ const MyBookingsScreen = () => {
                         {bookings.map((booking, index) => (
                             <tr key={index}>
                                 <td>{booking.tourName}</td>
+                                <td>{booking.location}</td>
                                 <td>
-                                    <FaMapMarkerAlt className='text-primary me-1' />
-                                    {booking.location}
+                                    {new Date(booking.date).toLocaleDateString('sr-RS')}
                                 </td>
-                                <td>{formatDate(booking.date)}</td>
                                 <td>{booking.numberOfPeople}</td>
-                                <td>{formatPrice(booking.totalPrice)}</td>
+                                <td>{booking.totalPrice} RSD</td>
                                 <td>
                                     <Badge bg='success'>Potvrđena</Badge>
                                 </td>
@@ -66,7 +52,7 @@ const MyBookingsScreen = () => {
                                     <Button
                                         variant='danger'
                                         size='sm'
-                                        onClick={cancelHandler}
+                                        onClick={() => deleteHandler(index)}
                                     >
                                         <FaTrash />
                                     </Button>
@@ -80,4 +66,4 @@ const MyBookingsScreen = () => {
     );
 };
 
-export default MyBookingsScreen;
+export default AdminBookingsScreen;
