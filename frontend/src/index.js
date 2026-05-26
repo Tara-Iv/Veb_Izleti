@@ -39,6 +39,7 @@ const router = createBrowserRouter(
             <Route path='/register' element={<RegisterScreen />} />
             <Route path='/about' element={<AboutScreen />} />
 
+            {/*
             <Route path='' element={<PrivateRoute />}>
                 <Route path='/booking/:id' element={<BookingScreen />} />
                 <Route path='/mybookings' element={<MyBookingsScreen />} />
@@ -50,6 +51,15 @@ const router = createBrowserRouter(
                 <Route path='/admin/bookings' element={<AdminBookingsScreen />} />
                 <Route path='/admin/users' element={<AdminUsersScreen />} />
             </Route>
+            */}
+
+            {/* PRIVREMENO - bez zastite ruta */}
+            <Route path='/booking/:id' element={<BookingScreen />} />
+            <Route path='/mybookings' element={<MyBookingsScreen />} />
+            <Route path='/profile' element={<ProfileScreen />} />
+            <Route path='/admin/tours' element={<AdminToursScreen />} />
+            <Route path='/admin/bookings' element={<AdminBookingsScreen />} />
+            <Route path='/admin/users' element={<AdminUsersScreen />} />
         </Route>
     )
 );

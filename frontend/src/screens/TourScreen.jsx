@@ -7,6 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Row, Col, Image, ListGroup, Card, Button, Badge } from 'react-bootstrap';
 import { FaMapMarkerAlt, FaClock, FaUsers, FaArrowLeft } from 'react-icons/fa';
 import Message from '../components/Message';
+import Rating from '../components/Rating';
 import tours from '../tours_list';
 import { useSelector } from 'react-redux';
 
@@ -49,6 +50,9 @@ const TourScreen = () => {
                         <ListGroup.Item>
                             <h2>{tour.name}</h2>
                             <Badge bg='primary'>{tour.category}</Badge>
+                        </ListGroup.Item>
+                        <ListGroup.Item>
+                             <Rating value={tour.rating} text={`${tour.numReviews} recenzija`} />
                         </ListGroup.Item>
                         <ListGroup.Item>
                             <FaMapMarkerAlt className='text-primary me-2' />

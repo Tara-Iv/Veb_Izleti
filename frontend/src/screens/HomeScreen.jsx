@@ -7,14 +7,17 @@ const HomeScreen = () => {
 
     return (
         <>
-            <h1 className='text-center my-4'>Otkrijte Evropu</h1>
-            <p className='lead text-center mb-5'>
-                Izaberite svoju sledeću avanturu iz naše ponude izleta po najlepšim evropskim destinacijama.
-            </p>
+            <div className='hero-section'>
+                <h1>Otkrijte Evropu</h1>
+                <p>
+                    Izaberite svoju sledeću avanturu iz naše ponude izleta
+                    po najlepšim evropskim destinacijama.
+                </p>
+            </div>
+
             {countries.map((country) => (
                 <div key={country} className='mb-5'>
-                    <h2 className='mb-3'>{country}</h2>
-                    <hr />
+                    <h2 className='country-title mb-4'>{country}</h2>
                     <Row>
                         {tours
                             .filter((tour) => tour.country === country)

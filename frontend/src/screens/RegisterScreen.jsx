@@ -1,26 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import FormContainer from '../components/FormContainer';
-import Loader from '../components/Loader';
-import Message from '../components/Message';
 import { useRegisterMutation } from '../slices/usersApiSlice';
 import { setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
+import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 
 const RegisterScreen = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState(null);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [register, { isLoading }] = useRegisterMutation();
-
     const { userInfo } = useSelector((state) => state.auth);
 
     const { search } = useLocation();
@@ -28,16 +24,12 @@ const RegisterScreen = () => {
     const redirect = sp.get('redirect') || '/';
 
     useEffect(() => {
-        if (userInfo) {
-            navigate(redirect);
-        }
+        if (userInfo) navigate(redirect);
     }, [userInfo, redirect, navigate]);
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        setError(null);
         if (password !== confirmPassword) {
-            setError('Lozinke se ne poklapaju.');
             toast.error('Lozinke se ne poklapaju.');
             return;
         }
@@ -46,71 +38,88 @@ const RegisterScreen = () => {
             dispatch(setCredentials({ ...res }));
             navigate(redirect);
         } catch (err) {
-            setError(err?.data?.message || 'Greška pri registraciji.');
             toast.error(err?.data?.message || 'Greška pri registraciji.');
         }
     };
 
     return (
-        <FormContainer>
-            <h1 className='mb-4'>Registracija</h1>
-            {error && <Message variant='danger'>{error}</Message>}
-            <Form onSubmit={submitHandler}>
-                <Form.Group controlId='name' className='mb-3'>
-                    <Form.Label>Ime i prezime</Form.Label>
-                    <Form.Control
-                        type='text'
-                        placeholder='Unesite ime i prezime'
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                </Form.Group>
-                <Form.Group controlId='email' className='mb-3'>
-                    <Form.Label>Email adresa</Form.Label>
-                    <Form.Control
-                        type='email'
-                        placeholder='Unesite email'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </Form.Group>
-                <Form.Group controlId='password' className='mb-3'>
-                    <Form.Label>Lozinka</Form.Label>
-                    <Form.Control
-                        type='password'
-                        placeholder='Unesite lozinku'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </Form.Group>
-                <Form.Group controlId='confirmPassword' className='mb-3'>
-                    <Form.Label>Potvrdite lozinku</Form.Label>
-                    <Form.Control
-                        type='password'
-                        placeholder='Ponovite lozinku'
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                </Form.Group>
-                <Button
-                    type='submit'
-                    variant='primary'
-                    className='w-100 mt-2'
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Učitavanje...' : 'Registruj se'}
-                </Button>
-                {isLoading && <Loader />}
-            </Form>
-            <Row className='mt-3'>
-                <Col>
+        <div className='auth-wrapper'>
+            <div className='auth-card'>
+                <div className='auth-header'>
+                    <h2>Registracija</h2>
+                    <p>Kreirajte vaš novi nalog</p>
+                </div>
+
+                <Form onSubmit={submitHandler}>
+                    <Form.Group controlId='name' className='auth-input-group mb-3'>
+                        <div className='auth-input-wrapper'>
+                            <FaUser className='auth-input-icon' />
+                            <Form.Control
+                                type='text'
+                                placeholder='Ime i prezime'
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className='auth-input'
+                            />
+                        </div>
+                    </Form.Group>
+
+                    <Form.Group controlId='email' className='auth-input-group mb-3'>
+                        <div className='auth-input-wrapper'>
+                            <FaEnvelope className='auth-input-icon' />
+                            <Form.Control
+                                type='email'
+                                placeholder='Email adresa'
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className='auth-input'
+                            />
+                        </div>
+                    </Form.Group>
+
+                    <Form.Group controlId='password' className='auth-input-group mb-3'>
+                        <div className='auth-input-wrapper'>
+                            <FaLock className='auth-input-icon' />
+                            <Form.Control
+                                type='password'
+                                placeholder='Lozinka'
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className='auth-input'
+                            />
+                        </div>
+                    </Form.Group>
+
+                    <Form.Group controlId='confirmPassword' className='auth-input-group mb-4'>
+                        <div className='auth-input-wrapper'>
+                            <FaLock className='auth-input-icon' />
+                            <Form.Control
+                                type='password'
+                                placeholder='Potvrdite lozinku'
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className='auth-input'
+                            />
+                        </div>
+                    </Form.Group>
+
+                    <Button
+                        type='submit'
+                        className='auth-btn w-100 mb-3'
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Učitavanje...' : 'Registruj se'}
+                    </Button>
+                </Form>
+
+                <div className='auth-footer'>
                     Već imate nalog?{' '}
                     <Link to={redirect ? `/login?redirect=${redirect}` : '/login'}>
                         Prijavite se
                     </Link>
-                </Col>
-            </Row>
-        </FormContainer>
+                </div>
+            </div>
+        </div>
     );
 };
 

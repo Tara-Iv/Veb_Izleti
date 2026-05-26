@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { FaUser, FaGlobe } from 'react-icons/fa';
+import { BsFillSuitcaseFill } from 'react-icons/bs';
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { LinkContainer } from 'react-router-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
+import logo from '../assets/styles/logo.png';
 
 const Header = () => {
     const { userInfo } = useSelector((state) => state.auth);
@@ -30,18 +33,27 @@ const Header = () => {
                 <Container>
                     <LinkContainer to='/'>
                         <Navbar.Brand>
-                            <FaGlobe className='me-2' />
-                            <span className='fw-semibold'>EasyTrip</span>
+                            <img
+                                src={logo}
+                                alt='EasyTrip Logo'
+                                style={{ width: '140px', height: '60px' }}
+                                />
                         </Navbar.Brand>
                     </LinkContainer>
                     <Navbar.Toggle aria-controls='basic-navbar-nav' />
                     <Navbar.Collapse id='basic-navbar-nav'>
                         <Nav className='ms-auto'>
                             <LinkContainer to='/tours'>
-                                <Nav.Link>Izleti</Nav.Link>
+                               <Nav.Link>
+                                    <BsFillSuitcaseFill className='me-1' />
+                                    Izleti
+                                </Nav.Link>
                             </LinkContainer>
                             <LinkContainer to='/about'>
-                                <Nav.Link>O aplikaciji</Nav.Link>
+                                <Nav.Link>
+                                    <FaMagnifyingGlass className='me-1' />
+                                    O nama
+                                </Nav.Link>
                             </LinkContainer>
                             {userInfo ? (
                                 <NavDropdown title={userInfo.name} id='username'>

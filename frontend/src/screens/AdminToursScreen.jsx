@@ -1,8 +1,6 @@
-import { Table, Button, Row, Col } from 'react-bootstrap';
+import { Table, Button, Row, Col, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import Loader from '../components/Loader';
-import Message from '../components/Message';
 import { toast } from 'react-toastify';
 import tours from '../tours_list';
 
@@ -28,58 +26,70 @@ const AdminToursScreen = () => {
                     </Button>
                 </Col>
             </Row>
-            <Table striped bordered hover responsive>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Naziv</th>
-                        <th>Država</th>
-                        <th>Lokacija</th>
-                        <th>Kategorija</th>
-                        <th>Trajanje</th>
-                        <th>Cena</th>
-                        <th>Dostupnost</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tours.map((tour) => (
-                        <tr key={tour._id}>
-                            <td>{tour._id}</td>
-                            <td>{tour.name}</td>
-                            <td>{tour.country}</td>
-                            <td>{tour.location}</td>
-                            <td>{tour.category}</td>
-                            <td>{tour.duration} {tour.duration === 1 ? 'dan' : 'dana'}</td>
-                            <td>{tour.price} RSD</td>
-                            <td>
-                                {tour.available ? (
-                                    <span className='text-success fw-semibold'>Dostupno</span>
-                                ) : (
-                                    <span className='text-danger fw-semibold'>Nedostupno</span>
-                                )}
-                            </td>
-                            <td>
-                                <Button
-                                    variant='warning'
-                                    size='sm'
-                                    className='me-2'
-                                    onClick={() => navigate(`/admin/tours/${tour._id}/edit`)}
-                                >
-                                    <FaEdit />
-                                </Button>
-                                <Button
-                                    variant='danger'
-                                    size='sm'
-                                    onClick={() => deleteHandler(tour._id)}
-                                >
-                                    <FaTrash />
-                                </Button>
-                            </td>
+
+            <div className='admin-table-wrapper'>
+                <Table hover responsive className='admin-table'>
+                    <thead>
+                        <tr>
+                            <th>Slika</th>
+                            <th>Naziv</th>
+                            <th>Država</th>
+                            <th>Kategorija</th>
+                            <th>Trajanje</th>
+                            <th>Cena</th>
+                            <th>Status</th>
+                            <th>Akcije</th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
+                    </thead>
+                    <tbody>
+                        {tours.map((tour) => (
+                            <tr key={tour._id}>
+                                <td>
+                                    <img
+                                        src={tour.image}
+                                        alt={tour.name}
+                                        className='admin-tour-img'
+                                    />
+                                </td>
+                                <td>
+                                    <strong>{tour.name}</strong>
+                                    <div className='text-muted small'>{tour.location}</div>
+                                </td>
+                                <td>{tour.country}</td>
+                                <td>
+                                    <Badge bg='primary'>{tour.category}</Badge>
+                                </td>
+                                <td>{tour.duration} {tour.duration === 1 ? 'dan' : 'dana'}</td>
+                                <td><strong>{tour.price.toLocaleString('sr-RS')} RSD</strong></td>
+                                <td>
+                                    {tour.available ? (
+                                        <Badge bg='success'>Dostupno</Badge>
+                                    ) : (
+                                        <Badge bg='danger'>Nedostupno</Badge>
+                                    )}
+                                </td>
+                                <td>
+                                    <Button
+                                        variant='outline-warning'
+                                        size='sm'
+                                        className='me-2'
+                                        onClick={() => navigate(`/admin/tours/${tour._id}/edit`)}
+                                    >
+                                        <FaEdit />
+                                    </Button>
+                                    <Button
+                                        variant='outline-danger'
+                                        size='sm'
+                                        onClick={() => deleteHandler(tour._id)}
+                                    >
+                                        <FaTrash />
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
         </>
     );
 };
