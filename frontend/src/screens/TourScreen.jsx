@@ -43,7 +43,9 @@ const TourScreen = () => {
             </Button>
             <Row>
                 <Col md={7}>
-                    <Image src={tour.image} alt={tour.name} fluid rounded />
+                    <div className='tour-detail-img-wrapper'>
+                        <img src={tour.image} alt={tour.name} className='tour-detail-img' />
+                    </div>
                 </Col>
                 <Col md={5}>
                     <ListGroup variant='flush'>

@@ -2,7 +2,7 @@ import { Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import Message from '../components/Message';
-import { clearBookingInfo } from '../slices/bookingSlice';
+import { cancelBooking } from '../slices/bookingSlice';
 import { FaTrash, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaClock } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { formatDate, formatPrice } from '../utils/bookingUtils';
@@ -12,15 +12,14 @@ const MyBookingsScreen = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const { bookingInfo } = useSelector((state) => state.booking);
-    const bookings = bookingInfo ? [bookingInfo] : [];
+    const { bookings } = useSelector((state) => state.booking);
 
-    const cancelHandler = () => {
-        if (window.confirm('Da li ste sigurni da želite da otkažete rezervaciju?')) {
-            dispatch(clearBookingInfo());
-            toast.success('Rezervacija je otkazana.');
-        }
-    };
+   const cancelHandler = (index) => {
+    if (window.confirm('Da li ste sigurni da želite da otkažete rezervaciju?')) {
+        dispatch(cancelBooking(index));
+        toast.success('Rezervacija je otkazana.');
+    }
+};
 
     const getTourImage = (tourId) => {
         const tour = tours.find((t) => t._id === tourId);
@@ -112,7 +111,7 @@ const MyBookingsScreen = () => {
                                                 <Button
                                                     variant='outline-danger'
                                                     size='sm'
-                                                    onClick={cancelHandler}
+                                                    onClick={() => cancelHandler(index)}
                                                     className='booking-cancel-btn'
                                                 >
                                                     <FaTrash className='me-2' />

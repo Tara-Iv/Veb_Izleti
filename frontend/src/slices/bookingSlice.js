@@ -3,26 +3,30 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    bookingInfo: localStorage.getItem('bookingInfo')
-        ? JSON.parse(localStorage.getItem('bookingInfo'))
-        : null,
+    bookings: localStorage.getItem('bookings')
+        ? JSON.parse(localStorage.getItem('bookings'))
+        : [],
 };
 
 const bookingSlice = createSlice({
     name: 'booking',
     initialState,
     reducers: {
-        setBookingInfo: (state, action) => {
-            state.bookingInfo = action.payload;
-            localStorage.setItem('bookingInfo', JSON.stringify(action.payload));
+        addBooking: (state, action) => {
+            state.bookings.push(action.payload);
+            localStorage.setItem('bookings', JSON.stringify(state.bookings));
         },
-        clearBookingInfo: (state) => {
-            state.bookingInfo = null;
-            localStorage.removeItem('bookingInfo');
+        cancelBooking: (state, action) => {
+            state.bookings = state.bookings.filter((_, index) => index !== action.payload);
+            localStorage.setItem('bookings', JSON.stringify(state.bookings));
+        },
+        clearAllBookings: (state) => {
+            state.bookings = [];
+            localStorage.removeItem('bookings');
         }
     }
 });
 
-export const { setBookingInfo, clearBookingInfo } = bookingSlice.actions;
+export const { addBooking, cancelBooking, clearAllBookings } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

@@ -6,9 +6,8 @@ import { formatDate, formatPrice } from '../utils/bookingUtils';
 import tours from '../tours_list';
 
 const AdminBookingsScreen = () => {
-    const { bookingInfo } = useSelector((state) => state.booking);
-    const bookings = bookingInfo ? [bookingInfo] : [];
-
+    const { bookings } = useSelector((state) => state.booking);
+    
     const getTourImage = (tourId) => {
         const tour = tours.find((t) => t._id === tourId);
         return tour ? tour.image : '';

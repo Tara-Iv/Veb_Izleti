@@ -10,7 +10,7 @@ import { Form, Button, Row, Col, Card, ListGroup, Badge } from 'react-bootstrap'
 import { FaMapMarkerAlt, FaClock, FaUsers } from 'react-icons/fa';
 import Message from '../components/Message';
 import { useDispatch } from 'react-redux';
-import { setBookingInfo } from '../slices/bookingSlice';
+import { addBooking } from '../slices/bookingSlice';
 import { toast } from 'react-toastify';
 import tours from '../tours_list';
 import { calculateTotalPrice, formatPrice } from '../utils/bookingUtils';
@@ -37,7 +37,7 @@ const BookingScreen = () => {
             toast.error('Molimo izaberite datum.');
             return;
         }
-        dispatch(setBookingInfo({
+        dispatch(addBooking({
             tourId: tour._id,
             tourName: tour.name,
             location: tour.location,
