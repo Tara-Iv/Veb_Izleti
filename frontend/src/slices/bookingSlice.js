@@ -1,4 +1,5 @@
 //za cuvanje informacija o rezervacijama
+//.filter - pravi novi niz u odnosu na uslov koji zadamo, u ovom slucaju uklanja rezervaciju sa odredjenim index-om
 
 import { createSlice } from '@reduxjs/toolkit';
 

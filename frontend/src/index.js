@@ -1,4 +1,11 @@
-//govori nam koje URL putanje vode do kojih screen-ova
+//ulazna tacka aplikacije
+//1. pravimo ruter koji prikazuje komponente na osnovu URL-a
+//2. browser router radi u browseru koristeci normalne URL adrese
+//3. createRoutesFromElements od jsx-a pravi rute koje browser router koristi
+//4. index = true - default child ruta, prikazuje se kada je URL tacno '/' - home stranica
+//5. RouterProvider koristi ruter koji smo napravili da bi prikazao odgovarajuce komponente
+//6. Provider omogucava svim elementima pristup Redux store-u
+//7. root - div u index.html gde se ucitava React aplikacija
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

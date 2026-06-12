@@ -1,3 +1,5 @@
+//.map - prolazi kroz niz i pravi novi na osnovu uslova 
+
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 
 const Rating = ({ value, text }) => {

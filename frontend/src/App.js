@@ -1,3 +1,11 @@
+//glavni layout aplikacije koji sadrzi header, footer i glavni sadrzaj
+//const App - funkcija koja vraca JSX layout aplikacije
+//useLocation - daje informacije o trenutnom URL-u
+//useEffect - dodaje ili uklanja css klase na osnovu toga da li smo na stranici za prijavu/registraciju ili ne
+//Outlet je mesto gde se ubacuju child komponente (npr. HomeScreen, LoginScreen, itd.)
+//ToastContainer - komponenta koja prikazuje obavestenja 
+
+
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { Outlet, useLocation } from 'react-router-dom';

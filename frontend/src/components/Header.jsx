@@ -1,3 +1,7 @@
+//dispatch - za promenu stanja u Redux store-u
+//unwrap - dobijemo ili odgovor ili gresku
+//expand md - navigacija duzine ekrana
+
 import { useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { FaUser, FaGlobe } from 'react-icons/fa';
@@ -10,9 +14,9 @@ import { logout } from '../slices/authSlice';
 import logo from '../assets/styles/logo.png';
 
 const Header = () => {
-    const { userInfo } = useSelector((state) => state.auth);
+    const { userInfo } = useSelector((state) => state.auth); //uzima informacije o korisniku iz Redux stora i prikazuje navigaciju u zavisnosti od tipa korisnika
 
-    const dispatch = useDispatch();
+    const dispatch = useDispatch(); 
     const navigate = useNavigate();
 
     const [logoutApiCall] = useLogoutMutation();

@@ -132,6 +132,38 @@ main {
     object-fit: cover;
 }
 
+/* ---- TOURS FILTER ---- */
+.tours-filter-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tours-filter-btn {
+    background: white !important;
+    color: #010e1d !important;
+    border: 2px solid #2b6cb0 !important;
+    border-radius: 25px !important;
+    padding: 8px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.tours-filter-btn:hover {
+    background: #2b6cb0 !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3) !important;
+}
+
+.tours-filter-btn.active {
+    background: linear-gradient(135deg, #1a365d, #2b6cb0) !important;
+    color: white !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba(43, 108, 176, 0.4) !important;
+}
+
 /* ---- NASLOVI DRZAVA ---- */
 .country-title {
     font-family: 'Playfair Display', serif;

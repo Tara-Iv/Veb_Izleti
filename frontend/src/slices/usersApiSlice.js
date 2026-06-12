@@ -1,5 +1,7 @@
-//pokriva sve što korisnik može da radi — 
-// prijava, registracija, odjava i upravljanje profilom.
+//pokriva sve što korisnik može da radi — prijava, registracija, odjava i upravljanje profilom.
+//login, post: salje login podatke serveru i obradjuje zahtev za prijavu
+//profile, get: dobija informacije o profilu sa servera od ulogovanog korisnika
+//updateProfile, put: salje azurirane podatke profila serveru
 
 import { apiSlice } from './apiSlice';
 import { USERS_URL } from '../constants';
@@ -9,7 +11,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
         login: builder.mutation({
             query: (data) => ({
                 url: `${USERS_URL}/auth`,
-                method: 'POST',
+                method: 'POST',  
                 body: data,
             }),
         }),
