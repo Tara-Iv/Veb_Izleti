@@ -1,20 +1,48 @@
 import { Badge, Row, Col, Button } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaCheck, FaTimes, FaUser } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaUser } from 'react-icons/fa';
 import Message from '../components/Message';
-import { useSelector } from 'react-redux';
+import Loader from '../components/Loader';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useGetUsersQuery, useDeleteUserMutation } from '../slices/usersApiSlice';
 
 const AdminUsersScreen = () => {
     const navigate = useNavigate();
-    const { userInfo } = useSelector((state) => state.auth);
-    const users = userInfo ? [userInfo] : [];
 
-    const deleteHandler = (id) => {
-        if (window.confirm('Da li ste sigurni da želite da obrišete ovog korisnika?')) {
-            toast.success('Korisnik je obrisan.');
-        }
-    };
+    const { data: users, isLoading, error, refetch } = useGetUsersQuery();
+    const [deleteUser] = useDeleteUserMutation();
+
+    const deleteHandler = async (userId) => {
+    toast(
+        <div>
+            <p className='mb-2'>Da li ste sigurni da želite da obrišete ovog korisnika?</p>
+            <div className='d-flex gap-2'>
+                <button
+                    className='btn btn-danger btn-sm'
+                    onClick={async () => {
+                        toast.dismiss();
+                        try {
+                            await deleteUser(userId).unwrap();
+                            toast.success('Korisnik je obrisan.');
+                            refetch();
+                        } catch (err) {
+                            toast.error(err?.data?.message || 'Greška pri brisanju.');
+                        }
+                    }}
+                >
+                    Da, obriši
+                </button>
+                <button
+                    className='btn btn-secondary btn-sm'
+                    onClick={() => toast.dismiss()}
+                >
+                    Odustani
+                </button>
+            </div>
+        </div>,
+        { autoClose: false, closeButton: false }
+    );
+};
 
     return (
         <>
@@ -23,12 +51,16 @@ const AdminUsersScreen = () => {
                     <h1>Upravljanje korisnicima</h1>
                 </Col>
                 <Col className='text-end text-muted'>
-                    Ukupno: <strong>{users.length}</strong> korisnika
+                    Ukupno: <strong>{users?.length || 0}</strong> korisnika
                 </Col>
             </Row>
 
-            {users.length === 0 ? (
-                <Message>Nema korisnika u sistemu.</Message>
+            {isLoading ? (
+                <Loader />
+            ) : error ? (
+                <Message variant='danger'>
+                    {error?.data?.message || error.error}
+                </Message>
             ) : (
                 <div className='admin-table-wrapper'>
                     <table className='table admin-table'>
@@ -61,10 +93,7 @@ const AdminUsersScreen = () => {
                                         )}
                                     </td>
                                     <td>
-                                        <Badge bg='success'>
-                                            <FaCheck className='me-1' />
-                                            Aktivan
-                                        </Badge>
+                                        <Badge bg='success'>Aktivan</Badge>
                                     </td>
                                     <td>
                                         <Button

@@ -1,13 +1,3 @@
-//pokriva kreiranje nove rezervacije, pregled svih rezervacija 
-//ulogovanog korisnika i detalje rezervacija
-//createBooking - koristi se za kreiranje nove rezervacije, šalje POST zahtev sa podacima o rezervaciji
-//builder.mutation - koristi se za operacije koje menjaju podatke (npr. kreiranje, brisanje, ažuriranje), dok se builder.query koristi za dobijanje podataka
-//getMyBookings - koristi se za dobijanje svih rezervacija koje je korisnik napravio, šalje GET zahtev
-//getBookingDetails - koristi se za dobijanje detalja jedne rezervacije, šalje GET zahtev sa ID-jem rezervacije
-
-//query - get
-//mutation - post, put, delete
-
 import { apiSlice } from './apiSlice';
 import { BOOKINGS_URL } from '../constants';
 
@@ -17,7 +7,7 @@ export const bookingsApiSlice = apiSlice.injectEndpoints({
             query: (data) => ({
                 url: BOOKINGS_URL,
                 method: 'POST',
-                body: data,  //podaci koji se salju backendu
+                body: data,
             }),
         }),
         getMyBookings: builder.query({
@@ -33,6 +23,41 @@ export const bookingsApiSlice = apiSlice.injectEndpoints({
             }),
             keepUnusedDataFor: 5,
         }),
+        cancelBooking: builder.mutation({
+            query: (bookingId) => ({
+                url: `${BOOKINGS_URL}/${bookingId}/cancel`,
+                method: 'PUT',
+            }),
+            invalidatesTags: ['Booking'],
+        }),
+        getBookings: builder.query({
+            query: () => ({
+                url: BOOKINGS_URL,
+            }),
+            providesTags: ['Booking'],
+            keepUnusedDataFor: 5,
+        }),
+        confirmBooking: builder.mutation({
+            query: (bookingId) => ({
+                url: `${BOOKINGS_URL}/${bookingId}/confirm`,
+                method: 'PUT',
+            }),
+            invalidatesTags: ['Booking'],
+        }),
+        deleteBooking: builder.mutation({
+            query: (bookingId) => ({
+                url: `${BOOKINGS_URL}/${bookingId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Booking'],
+        }),
+        completeExpiredBookings: builder.mutation({
+            query: () => ({
+                url: `${BOOKINGS_URL}/complete-expired`,
+                method: 'PUT',
+            }),
+            invalidatesTags: ['Booking'],
+        }),
     }),
 });
 
@@ -40,4 +65,9 @@ export const {
     useCreateBookingMutation,
     useGetMyBookingsQuery,
     useGetBookingDetailsQuery,
+    useCancelBookingMutation,
+    useGetBookingsQuery,
+    useConfirmBookingMutation,
+    useDeleteBookingMutation,
+    useCompleteExpiredBookingsMutation,
 } = bookingsApiSlice;

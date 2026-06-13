@@ -1,12 +1,3 @@
-//ulazna tacka aplikacije
-//1. pravimo ruter koji prikazuje komponente na osnovu URL-a
-//2. browser router radi u browseru koristeci normalne URL adrese
-//3. createRoutesFromElements od jsx-a pravi rute koje browser router koristi
-//4. index = true - default child ruta, prikazuje se kada je URL tacno '/' - home stranica
-//5. RouterProvider koristi ruter koji smo napravili da bi prikazao odgovarajuce komponente
-//6. Provider omogucava svim elementima pristup Redux store-u
-//7. root - div u index.html gde se ucitava React aplikacija
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {
@@ -35,6 +26,8 @@ import ProfileScreen from './screens/ProfileScreen';
 import AdminToursScreen from './screens/AdminToursScreen';
 import AdminBookingsScreen from './screens/AdminBookingsScreen';
 import AdminUsersScreen from './screens/AdminUsersScreen';
+import AdminTourEditScreen from './screens/AdminTourEditScreen';
+import AdminUserEditScreen from './screens/AdminUserEditScreen';
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -46,7 +39,6 @@ const router = createBrowserRouter(
             <Route path='/register' element={<RegisterScreen />} />
             <Route path='/about' element={<AboutScreen />} />
 
-            {/*
             <Route path='' element={<PrivateRoute />}>
                 <Route path='/booking/:id' element={<BookingScreen />} />
                 <Route path='/mybookings' element={<MyBookingsScreen />} />
@@ -55,18 +47,12 @@ const router = createBrowserRouter(
 
             <Route path='' element={<AdminRoute />}>
                 <Route path='/admin/tours' element={<AdminToursScreen />} />
+                <Route path='/admin/tours/create' element={<AdminTourEditScreen />} />
+                <Route path='/admin/tours/:id/edit' element={<AdminTourEditScreen />} />
                 <Route path='/admin/bookings' element={<AdminBookingsScreen />} />
                 <Route path='/admin/users' element={<AdminUsersScreen />} />
+                <Route path='/admin/users/:id/edit' element={<AdminUserEditScreen />} />
             </Route>
-            */}
-
-            {/* PRIVREMENO - bez zastite ruta */}
-            <Route path='/booking/:id' element={<BookingScreen />} />
-            <Route path='/mybookings' element={<MyBookingsScreen />} />
-            <Route path='/profile' element={<ProfileScreen />} />
-            <Route path='/admin/tours' element={<AdminToursScreen />} />
-            <Route path='/admin/bookings' element={<AdminBookingsScreen />} />
-            <Route path='/admin/users' element={<AdminUsersScreen />} />
         </Route>
     )
 );

@@ -1,16 +1,113 @@
-import { Badge, Row, Col } from 'react-bootstrap';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUsers } from 'react-icons/fa';
+import { Badge, Row, Col, Button } from 'react-bootstrap';
+import { FaCheck, FaTimes, FaTrash, FaCalendarAlt, FaUsers, FaSyncAlt } from 'react-icons/fa';
 import Message from '../components/Message';
-import { useSelector } from 'react-redux';
+import Loader from '../components/Loader';
+import { toast } from 'react-toastify';
 import { formatDate, formatPrice } from '../utils/bookingUtils';
-import tours from '../tours_list';
+import {
+    useGetBookingsQuery,
+    useConfirmBookingMutation,
+    useCancelBookingMutation,
+    useDeleteBookingMutation,
+    useCompleteExpiredBookingsMutation,
+} from '../slices/bookingsApiSlice';
 
 const AdminBookingsScreen = () => {
-    const { bookings } = useSelector((state) => state.booking);
-    
-    const getTourImage = (tourId) => {
-        const tour = tours.find((t) => t._id === tourId);
-        return tour ? tour.image : '';
+    const { data: bookings, isLoading, error, refetch } = useGetBookingsQuery();
+    const [confirmBooking] = useConfirmBookingMutation();
+    const [cancelBooking] = useCancelBookingMutation();
+    const [deleteBooking] = useDeleteBookingMutation();
+    const [completeExpired] = useCompleteExpiredBookingsMutation();
+
+    const confirmHandler = async (bookingId) => {
+        try {
+            await confirmBooking(bookingId).unwrap();
+            toast.success('Rezervacija potvrđena.');
+            refetch();
+        } catch (err) {
+            toast.error(err?.data?.message || 'Greška pri potvrđivanju.');
+        }
+    };
+
+    const cancelHandler = async (bookingId) => {
+        toast(
+            <div>
+                <p className='mb-2'>Da li ste sigurni da želite da otkažete ovu rezervaciju?</p>
+                <div className='d-flex gap-2'>
+                    <button
+                        className='btn btn-danger btn-sm'
+                        onClick={async () => {
+                            toast.dismiss();
+                            try {
+                                await cancelBooking(bookingId).unwrap();
+                                toast.success('Rezervacija otkazana.');
+                                refetch();
+                            } catch (err) {
+                                toast.error(err?.data?.message || 'Greška pri otkazivanju.');
+                            }
+                        }}
+                    >
+                        Da, otkaži
+                    </button>
+                    <button
+                        className='btn btn-secondary btn-sm'
+                        onClick={() => toast.dismiss()}
+                    >
+                        Odustani
+                    </button>
+                </div>
+            </div>,
+            { autoClose: false, closeButton: false }
+        );
+    };
+
+    const deleteHandler = async (bookingId) => {
+        toast(
+            <div>
+                <p className='mb-2'>Obrisati ovu rezervaciju trajno?</p>
+                <div className='d-flex gap-2'>
+                    <button
+                        className='btn btn-danger btn-sm'
+                        onClick={async () => {
+                            toast.dismiss();
+                            try {
+                                await deleteBooking(bookingId).unwrap();
+                                toast.success('Rezervacija obrisana.');
+                                refetch();
+                            } catch (err) {
+                                toast.error(err?.data?.message || 'Greška pri brisanju.');
+                            }
+                        }}
+                    >
+                        Da, obriši
+                    </button>
+                    <button
+                        className='btn btn-secondary btn-sm'
+                        onClick={() => toast.dismiss()}
+                    >
+                        Odustani
+                    </button>
+                </div>
+            </div>,
+            { autoClose: false, closeButton: false }
+        );
+    };
+
+    const completeExpiredHandler = async () => {
+        try {
+            const res = await completeExpired().unwrap();
+            toast.success(res.message);
+            refetch();
+        } catch (err) {
+            toast.error(err?.data?.message || 'Greška.');
+        }
+    };
+
+    const getStatusBadge = (status) => {
+        if (status === 'confirmed') return <Badge bg='success'>Potvrđena</Badge>;
+        if (status === 'cancelled') return <Badge bg='danger'>Otkazana</Badge>;
+        if (status === 'completed') return <Badge bg='info'>Završena</Badge>;
+        return <Badge bg='warning' text='dark'>Na čekanju</Badge>;
     };
 
     return (
@@ -19,12 +116,28 @@ const AdminBookingsScreen = () => {
                 <Col>
                     <h1>Upravljanje rezervacijama</h1>
                 </Col>
-                <Col className='text-end text-muted'>
-                    Ukupno: <strong>{bookings.length}</strong> rezervacija
+                <Col className='text-end d-flex gap-2 justify-content-end align-items-center'>
+                    <span className='text-muted'>
+                        Ukupno: <strong>{bookings?.length || 0}</strong>
+                    </span>
+                    <Button
+                        variant='outline-info'
+                        size='sm'
+                        onClick={completeExpiredHandler}
+                    >
+                        <FaSyncAlt className='me-2' />
+                        Završi istekle
+                    </Button>
                 </Col>
             </Row>
 
-            {bookings.length === 0 ? (
+            {isLoading ? (
+                <Loader />
+            ) : error ? (
+                <Message variant='danger'>
+                    {error?.data?.message || error.error}
+                </Message>
+            ) : bookings.length === 0 ? (
                 <Message>Nema rezervacija u sistemu.</Message>
             ) : (
                 <div className='admin-table-wrapper'>
@@ -32,21 +145,21 @@ const AdminBookingsScreen = () => {
                         <thead>
                             <tr>
                                 <th>Izlet</th>
-                                <th>Lokacija</th>
+                                <th>Korisnik</th>
                                 <th>Datum</th>
                                 <th>Br. osoba</th>
-                                <th>Cena po osobi</th>
                                 <th>Ukupno</th>
                                 <th>Status</th>
+                                <th>Akcije</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {bookings.map((booking, index) => (
-                                <tr key={index}>
+                            {bookings.map((booking) => (
+                                <tr key={booking._id}>
                                     <td>
-                                        <div className='d-flex align-items-center gap-3'>
+                                        <div className='d-flex align-items-center gap-2'>
                                             <img
-                                                src={getTourImage(booking.tourId)}
+                                                src={booking.tourImage}
                                                 alt={booking.tourName}
                                                 className='admin-tour-img'
                                             />
@@ -54,25 +167,61 @@ const AdminBookingsScreen = () => {
                                         </div>
                                     </td>
                                     <td>
-                                        <FaMapMarkerAlt className='text-primary me-1' />
-                                        {booking.location}
+                                        <div>{booking.user?.name}</div>
+                                        <small className='text-muted'>{booking.user?.email}</small>
                                     </td>
                                     <td>
                                         <FaCalendarAlt className='text-secondary me-1' />
-                                        {formatDate(booking.date)}
+                                        {formatDate(booking.travelDate)}
                                     </td>
                                     <td>
                                         <FaUsers className='text-secondary me-1' />
-                                        {booking.numberOfPeople}
+                                        {booking.numPersons}
                                     </td>
-                                    <td>{formatPrice(booking.pricePerPerson)}</td>
                                     <td>
                                         <strong className='text-primary'>
                                             {formatPrice(booking.totalPrice)}
                                         </strong>
                                     </td>
+                                    <td>{getStatusBadge(booking.status)}</td>
                                     <td>
-                                        <Badge bg='success'>Potvrđena</Badge>
+                                        {booking.status === 'pending' && (
+                                            <>
+                                                <Button
+                                                    variant='outline-success'
+                                                    size='sm'
+                                                    className='me-2'
+                                                    onClick={() => confirmHandler(booking._id)}
+                                                >
+                                                    <FaCheck />
+                                                </Button>
+                                                <Button
+                                                    variant='outline-danger'
+                                                    size='sm'
+                                                    onClick={() => cancelHandler(booking._id)}
+                                                >
+                                                    <FaTimes />
+                                                </Button>
+                                            </>
+                                        )}
+                                        {booking.status === 'confirmed' && (
+                                            <Button
+                                                variant='outline-danger'
+                                                size='sm'
+                                                onClick={() => cancelHandler(booking._id)}
+                                            >
+                                                <FaTimes />
+                                            </Button>
+                                        )}
+                                        {(booking.status === 'cancelled' || booking.status === 'completed') && (
+                                            <Button
+                                                variant='outline-danger'
+                                                size='sm'
+                                                onClick={() => deleteHandler(booking._id)}
+                                            >
+                                                <FaTrash />
+                                            </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

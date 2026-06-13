@@ -19,7 +19,36 @@ export const toursApiSlice = apiSlice.injectEndpoints({
             }),
             keepUnusedDataFor: 5,
         }),
+        createTour: builder.mutation({
+            query: (data) => ({
+                url: TOURS_URL,
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['Tour'],
+        }),
+        updateTour: builder.mutation({
+            query: (data) => ({
+                url: `${TOURS_URL}/${data._id}`,
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: ['Tour'],
+        }),
+        deleteTour: builder.mutation({
+            query: (tourId) => ({
+                url: `${TOURS_URL}/${tourId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Tour'],
+        }),
     }),
 });
 
-export const { useGetToursQuery, useGetTourDetailsQuery } = toursApiSlice;
+export const {
+    useGetToursQuery,
+    useGetTourDetailsQuery,
+    useCreateTourMutation,
+    useUpdateTourMutation,
+    useDeleteTourMutation,
+} = toursApiSlice;

@@ -1,153 +1,169 @@
-//Korisnik bira datum polaska i broj osoba, a cena se automatski računa u realnom vremenu
-//min={new Date().toISOString().split('T')[0]} sprečava izbor datuma u prošlosti
-//max={tour.maxGroupSize} ograničava broj osoba na maksimum grupe
-//Podaci o rezervaciji se čuvaju u Redux store kroz bookingSlice
-//Ova stranica je zaštićena PrivateRoute — dostupna samo ulogovanim korisnicima
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col, Card, ListGroup, Badge } from 'react-bootstrap';
 import { FaMapMarkerAlt, FaClock, FaUsers } from 'react-icons/fa';
 import Message from '../components/Message';
-import { useDispatch } from 'react-redux';
-import { addBooking } from '../slices/bookingSlice';
+import Loader from '../components/Loader';
+import { useGetTourDetailsQuery } from '../slices/toursApiSlice';
+import { useCreateBookingMutation } from '../slices/bookingsApiSlice';
+import { formatPrice } from '../utils/bookingUtils';
 import { toast } from 'react-toastify';
-import tours from '../tours_list';
-import { calculateTotalPrice, formatPrice } from '../utils/bookingUtils';
 
 const BookingScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
-    const tour = tours.find((t) => t._id === id);
+    const [travelDate, setTravelDate] = useState('');
+    const [numPersons, setNumPersons] = useState(1);
+    const [contactPhone, setContactPhone] = useState('');
 
-    const [date, setDate] = useState('');
-    const [numberOfPeople, setNumberOfPeople] = useState(1);
+    const { data: tour, isLoading, error } = useGetTourDetailsQuery(id);
+    const [createBooking, { isLoading: isBooking }] = useCreateBookingMutation();
 
-    if (!tour) {
-        return <Message variant='danger'>Izlet nije pronađen.</Message>;
-    }
+    const totalPrice = tour ? tour.price * numPersons : 0;
 
-    const totalPrice = calculateTotalPrice(tour.price, numberOfPeople);
-
-    const submitHandler = (e) => {
+    const submitHandler = async (e) => {
         e.preventDefault();
-        if (!date) {
+        if (!travelDate) {
             toast.error('Molimo izaberite datum.');
             return;
         }
-        dispatch(addBooking({
-            tourId: tour._id,
-            tourName: tour.name,
-            location: tour.location,
-            date,
-            numberOfPeople,
-            pricePerPerson: tour.price,
-            totalPrice,
-        }));
-        navigate('/mybookings');
-        toast.success('Rezervacija uspešno kreirana!');
+        if (!contactPhone) {
+            toast.error('Molimo unesite kontakt telefon.');
+            return;
+        }
+        try {
+            await createBooking({
+                tourId: tour._id,
+                numPersons,
+                travelDate,
+                contactPhone,
+            }).unwrap();
+            toast.success('Rezervacija uspešno kreirana!');
+            navigate('/mybookings');
+        } catch (err) {
+            toast.error(err?.data?.message || 'Greška pri rezervaciji.');
+        }
     };
 
     return (
         <>
             <h1 className='mb-4'>Rezervacija izleta</h1>
-            <Row>
-                <Col md={7}>
-                    <Card className='mb-4 shadow-sm'>
-                        <Card.Body>
-                            <h4 className='mb-3'>Detalji izleta</h4>
-                            <ListGroup variant='flush'>
-                                <ListGroup.Item>
-                                    <strong>{tour.name}</strong>
-                                    <Badge bg='primary' className='ms-2'>
-                                        {tour.category}
-                                    </Badge>
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <FaMapMarkerAlt className='text-primary me-2' />
-                                    {tour.location}
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <FaClock className='text-secondary me-2' />
-                                    Trajanje: {tour.duration} {tour.duration === 1 ? 'dan' : 'dana'}
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <FaUsers className='text-secondary me-2' />
-                                    Maksimalno {tour.maxGroupSize} osoba
-                                </ListGroup.Item>
-                            </ListGroup>
-                        </Card.Body>
-                    </Card>
+            {isLoading ? (
+                <Loader />
+            ) : error ? (
+                <Message variant='danger'>
+                    {error?.data?.message || error.error}
+                </Message>
+            ) : (
+                <Row>
+                    <Col md={7}>
+                        <Card className='mb-4 shadow-sm'>
+                            <Card.Body>
+                                <h4 className='mb-3'>Detalji izleta</h4>
+                                <ListGroup variant='flush'>
+                                    <ListGroup.Item>
+                                        <strong>{tour.name}</strong>
+                                        <Badge bg='primary' className='ms-2'>
+                                            {tour.category}
+                                        </Badge>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <FaMapMarkerAlt className='text-primary me-2' />
+                                        {tour.location}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <FaClock className='text-secondary me-2' />
+                                        Trajanje: {tour.duration} {tour.duration === 1 ? 'dan' : 'dana'}
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <FaUsers className='text-secondary me-2' />
+                                        Slobodna mesta: {tour.availableSpots}
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Card.Body>
+                        </Card>
 
-                    <Card className='shadow-sm'>
-                        <Card.Body>
-                            <h4 className='mb-3'>Podaci o rezervaciji</h4>
-                            <Form onSubmit={submitHandler}>
-                                <Form.Group controlId='date' className='mb-3'>
-                                    <Form.Label>Datum polaska</Form.Label>
-                                    <Form.Control
-                                        type='date'
-                                        value={date}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        onChange={(e) => setDate(e.target.value)}
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId='numberOfPeople' className='mb-3'>
-                                    <Form.Label>Broj osoba</Form.Label>
-                                    <Form.Control
-                                        type='number'
-                                        value={numberOfPeople}
-                                        min={1}
-                                        max={tour.maxGroupSize}
-                                        onChange={(e) => setNumberOfPeople(Number(e.target.value))}
-                                    />
-                                </Form.Group>
-                                <Button
-                                    type='submit'
-                                    variant='primary'
-                                    className='w-100 mt-2'
-                                >
-                                    Potvrdi rezervaciju
-                                </Button>
-                            </Form>
-                        </Card.Body>
-                    </Card>
-                </Col>
+                        <Card className='shadow-sm'>
+                            <Card.Body>
+                                <h4 className='mb-3'>Podaci o rezervaciji</h4>
+                                <Form onSubmit={submitHandler}>
+                                    <Form.Group controlId='date' className='mb-3'>
+                                        <Form.Label>Datum polaska</Form.Label>
+                                        <Form.Control
+                                            type='date'
+                                            value={travelDate}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            onChange={(e) => setTravelDate(e.target.value)}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId='numPersons' className='mb-3'>
+                                        <Form.Label>Broj osoba</Form.Label>
+                                        <Form.Control
+                                            type='number'
+                                            value={numPersons}
+                                            min={1}
+                                            max={tour.availableSpots}
+                                            onChange={(e) => setNumPersons(Number(e.target.value))}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId='contactPhone' className='mb-3'>
+                                        <Form.Label>Kontakt telefon</Form.Label>
+                                        <Form.Control
+                                            type='text'
+                                            placeholder='Unesite broj telefona'
+                                            value={contactPhone}
+                                            onChange={(e) => setContactPhone(e.target.value)}
+                                        />
+                                    </Form.Group>
+                                    <Button
+                                        type='submit'
+                                        variant='primary'
+                                        className='w-100 mt-2'
+                                        disabled={isBooking}
+                                    >
+                                        {isBooking ? 'Slanje...' : 'Potvrdi rezervaciju'}
+                                    </Button>
+                                </Form>
+                            </Card.Body>
+                        </Card>
+                    </Col>
 
-                <Col md={5}>
-                    <Card className='shadow-sm'>
-                        <Card.Body>
-                            <h4 className='mb-3'>Pregled cene</h4>
-                            <ListGroup variant='flush'>
-                                <ListGroup.Item>
-                                    <Row>
-                                        <Col>Cena po osobi:</Col>
-                                        <Col className='text-end'>{formatPrice(tour.price)}</Col>
-                                    </Row>
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <Row>
-                                        <Col>Broj osoba:</Col>
-                                        <Col className='text-end'>{numberOfPeople}</Col>
-                                    </Row>
-                                </ListGroup.Item>
-                                <ListGroup.Item>
-                                    <Row>
-                                        <Col><strong>Ukupno:</strong></Col>
-                                        <Col className='text-end'>
-                                            <strong className='text-primary'>
-                                                {formatPrice(totalPrice)}
-                                            </strong>
-                                        </Col>
-                                    </Row>
-                                </ListGroup.Item>
-                            </ListGroup>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
+                    <Col md={5}>
+                        <Card className='shadow-sm'>
+                            <Card.Body>
+                                <h4 className='mb-3'>Pregled cene</h4>
+                                <ListGroup variant='flush'>
+                                    <ListGroup.Item>
+                                        <Row>
+                                            <Col>Cena po osobi:</Col>
+                                            <Col className='text-end'>
+                                                {formatPrice(tour.price)}
+                                            </Col>
+                                        </Row>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <Row>
+                                            <Col>Broj osoba:</Col>
+                                            <Col className='text-end'>{numPersons}</Col>
+                                        </Row>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item>
+                                        <Row>
+                                            <Col><strong>Ukupno:</strong></Col>
+                                            <Col className='text-end'>
+                                                <strong className='text-primary'>
+                                                    {formatPrice(totalPrice)}
+                                                </strong>
+                                            </Col>
+                                        </Row>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            )}
         </>
     );
 };
