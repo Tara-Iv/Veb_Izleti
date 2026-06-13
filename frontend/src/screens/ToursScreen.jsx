@@ -17,7 +17,7 @@ const ToursScreen = () => {
 
     return (
         <>
-            <h1 className='text-center my-4'>Svi izleti</h1>
+            <h1 className='text-center my-4'>Izleti</h1>
 
             <div className='tours-filter-wrapper mb-5'>
                 {countries.map((country) => (
