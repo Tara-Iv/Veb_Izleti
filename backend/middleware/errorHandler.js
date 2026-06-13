@@ -1,5 +1,5 @@
 const notFound = (req, res, next) => {
-    const error = new Error(`Nije pronađeno - ${req.originalUrl}`);
+    const error = new Error(`Nije pronađeno`);
     res.status(404);
     next(error);
 };
