@@ -78,7 +78,7 @@ const AdminToursScreen = () => {
                                 <th>Kategorija</th>
                                 <th>Trajanje</th>
                                 <th>Cena</th>
-                                <th>Mesta</th>
+                                <th>Max. grupa</th>
                                 <th>Status</th>
                                 <th>Akcije</th>
                             </tr>
@@ -103,7 +103,7 @@ const AdminToursScreen = () => {
                                     </td>
                                     <td>{tour.duration} {tour.duration === 1 ? 'dan' : 'dana'}</td>
                                     <td><strong>{tour.price.toLocaleString('sr-RS')} RSD</strong></td>
-                                    <td>{tour.availableSpots} / {tour.maxGroupSize}</td>
+                                    <td>{tour.maxGroupSize}</td>
                                     <td>
                                         {tour.available ? (
                                             <Badge bg='success'>Dostupno</Badge>

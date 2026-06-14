@@ -10,6 +10,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import tourRoutes from './routes/tourRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import Booking from './models/bookingModel.js';
 
 const port = process.env.PORT || 5000;
 
@@ -31,6 +32,30 @@ app.use('/api/bookings', bookingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
+
+const completeExpiredBookings = async () => {
+    try {
+        const today = new Date();
+        const result = await Booking.updateMany(
+            {
+                status: 'confirmed',
+                travelDate: { $lt: today },
+            },
+            { $set: { status: 'completed' } }
+        );
+        if (result.modifiedCount > 0) {
+            console.log(`${result.modifiedCount} rezervacija automatski označeno kao završeno`);
+        }
+    } catch (error) {
+        console.log('Greška pri automatskom završavanju rezervacija:', error.message);
+    }
+};
+
+// Pokreni odmah pri startu servera
+completeExpiredBookings();
+
+// Pa zatim svaki dan
+setInterval(completeExpiredBookings, 24 * 60 * 60 * 1000);
 
 app.listen(port, () =>
     console.log(`Server radi na portu ${port}`)

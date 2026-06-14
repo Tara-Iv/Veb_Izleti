@@ -18,7 +18,15 @@ const importData = async () => {
         await User.deleteMany();
 
         await User.insertMany(users);
-        await Tour.insertMany(tours);
+
+        const toursWithDefaults = tours.map((tour) => ({
+            ...tour,
+            rating: 0,
+            numReviews: 0,
+            reviews: [],
+        }));
+
+        await Tour.insertMany(toursWithDefaults);
 
         console.log('Podaci uspešno uvezeni!'.green.inverse);
         process.exit();

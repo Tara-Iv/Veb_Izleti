@@ -9,6 +9,7 @@ export const bookingsApiSlice = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: data,
             }),
+            invalidatesTags: ['Availability'],
         }),
         getMyBookings: builder.query({
             query: () => ({
@@ -28,7 +29,7 @@ export const bookingsApiSlice = apiSlice.injectEndpoints({
                 url: `${BOOKINGS_URL}/${bookingId}/cancel`,
                 method: 'PUT',
             }),
-            invalidatesTags: ['Booking'],
+            invalidatesTags: ['Booking', 'Availability'],
         }),
         getBookings: builder.query({
             query: () => ({
@@ -58,6 +59,20 @@ export const bookingsApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Booking'],
         }),
+       getTourAvailability: builder.query({
+            query: ({ tourId, date }) => ({
+                url: `${BOOKINGS_URL}/availability/${tourId}?date=${date}`,
+            }),
+            providesTags: ['Availability'],
+        }),
+        createTourReview: builder.mutation({
+            query: ({ bookingId, rating, comment }) => ({
+                url: `${BOOKINGS_URL}/${bookingId}/review`,
+                method: 'POST',
+                body: { rating, comment },
+            }),
+            invalidatesTags: ['Booking', 'Tour'],
+        }),
     }),
 });
 
@@ -70,4 +85,6 @@ export const {
     useConfirmBookingMutation,
     useDeleteBookingMutation,
     useCompleteExpiredBookingsMutation,
+    useGetTourAvailabilityQuery,
+    useCreateTourReviewMutation,
 } = bookingsApiSlice;

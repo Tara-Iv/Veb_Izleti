@@ -7,10 +7,13 @@ import { FaTrash, FaMapMarkerAlt, FaCalendarAlt, FaUsers, FaClock, FaHistory, Fa
 import { toast } from 'react-toastify';
 import { formatDate, formatPrice } from '../utils/bookingUtils';
 import { useGetMyBookingsQuery, useCancelBookingMutation } from '../slices/bookingsApiSlice';
+import ReviewModal from '../components/ReviewModal';
+import { FaStar } from 'react-icons/fa';
 
 const MyBookingsScreen = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('current');
+    const [reviewBooking, setReviewBooking] = useState(null);
 
     const { data: bookings, isLoading, error, refetch } = useGetMyBookingsQuery();
     const [cancelBooking, { isLoading: isCancelling }] = useCancelBookingMutation();
@@ -158,6 +161,21 @@ const MyBookingsScreen = () => {
                                                     <FaTrash className='me-2' />
                                                     Otkaži rezervaciju
                                                 </Button>
+                                            ) : booking.status === 'completed' && !booking.rated ? (
+                                                <Button
+                                                    variant='outline-warning'
+                                                    size='sm'
+                                                    onClick={() => setReviewBooking(booking)}
+                                                    className='booking-cancel-btn'
+                                                >
+                                                    <FaStar className='me-2' />
+                                                    Ocenite izlet
+                                                </Button>
+                                            ) : booking.status === 'completed' && booking.rated ? (
+                                                <span className='text-success small'>
+                                                    <FaStar className='me-1' />
+                                                    Ocenjeno
+                                                </span>
                                             ) : null}
                                         </div>
                                     </Card.Body>
@@ -197,13 +215,23 @@ const MyBookingsScreen = () => {
                 </button>
             </div>
 
-            {isLoading ? (
+           {isLoading ? (
                 <Loader />
             ) : error ? (
                 <Message variant='danger'>
                     {error?.data?.message || error.error}
                 </Message>
             ) : renderBookings(displayedBookings)}
+
+            {reviewBooking && (
+                <ReviewModal
+                    show={true}
+                    onHide={() => setReviewBooking(null)}
+                    bookingId={reviewBooking._id}
+                    tourName={reviewBooking.tourName}
+                    onSuccess={refetch}
+                />
+            )}
         </>
     );
 };

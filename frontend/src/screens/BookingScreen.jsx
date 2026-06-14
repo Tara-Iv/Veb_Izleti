@@ -5,7 +5,7 @@ import { FaMapMarkerAlt, FaClock, FaUsers } from 'react-icons/fa';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { useGetTourDetailsQuery } from '../slices/toursApiSlice';
-import { useCreateBookingMutation } from '../slices/bookingsApiSlice';
+import { useCreateBookingMutation, useGetTourAvailabilityQuery } from '../slices/bookingsApiSlice';
 import { formatPrice } from '../utils/bookingUtils';
 import { toast } from 'react-toastify';
 
@@ -20,7 +20,20 @@ const BookingScreen = () => {
     const { data: tour, isLoading, error } = useGetTourDetailsQuery(id);
     const [createBooking, { isLoading: isBooking }] = useCreateBookingMutation();
 
+    const {
+        data: availability,
+        isFetching: isCheckingAvailability,
+    } = useGetTourAvailabilityQuery(
+        { tourId: id, date: travelDate },
+        { skip: !travelDate }
+    );
+
     const totalPrice = tour ? tour.price * numPersons : 0;
+
+    const handleDateChange = (e) => {
+        setTravelDate(e.target.value);
+        setNumPersons(1);
+    };
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -30,6 +43,10 @@ const BookingScreen = () => {
         }
         if (!contactPhone) {
             toast.error('Molimo unesite kontakt telefon.');
+            return;
+        }
+        if (availability && numPersons > availability.availableSpots) {
+            toast.error('Nema dovoljno slobodnih mesta za izabrani datum.');
             return;
         }
         try {
@@ -78,7 +95,7 @@ const BookingScreen = () => {
                                     </ListGroup.Item>
                                     <ListGroup.Item>
                                         <FaUsers className='text-secondary me-2' />
-                                        Slobodna mesta: {tour.availableSpots}
+                                        Maksimalna veličina grupe: {tour.maxGroupSize}
                                     </ListGroup.Item>
                                 </ListGroup>
                             </Card.Body>
@@ -94,19 +111,40 @@ const BookingScreen = () => {
                                             type='date'
                                             value={travelDate}
                                             min={new Date().toISOString().split('T')[0]}
-                                            onChange={(e) => setTravelDate(e.target.value)}
+                                            onChange={handleDateChange}
                                         />
                                     </Form.Group>
+
+                                    {travelDate && (
+                                        <div className='availability-info mb-3'>
+                                            {isCheckingAvailability ? (
+                                                <span className='text-muted'>Provera dostupnosti...</span>
+                                            ) : availability ? (
+                                                availability.availableSpots > 0 ? (
+                                                    <Message variant='info'>
+                                                        Slobodno mesta za izabrani datum: <strong>{availability.availableSpots}</strong> / {availability.maxGroupSize}
+                                                    </Message>
+                                                ) : (
+                                                    <Message variant='danger'>
+                                                        Nema slobodnih mesta za izabrani datum. Izaberite drugi datum.
+                                                    </Message>
+                                                )
+                                            ) : null}
+                                        </div>
+                                    )}
+
                                     <Form.Group controlId='numPersons' className='mb-3'>
                                         <Form.Label>Broj osoba</Form.Label>
                                         <Form.Control
                                             type='number'
                                             value={numPersons}
                                             min={1}
-                                            max={tour.availableSpots}
+                                            max={availability ? availability.availableSpots : tour.maxGroupSize}
                                             onChange={(e) => setNumPersons(Number(e.target.value))}
+                                            disabled={!travelDate}
                                         />
                                     </Form.Group>
+
                                     <Form.Group controlId='contactPhone' className='mb-3'>
                                         <Form.Label>Kontakt telefon</Form.Label>
                                         <Form.Control
@@ -120,7 +158,7 @@ const BookingScreen = () => {
                                         type='submit'
                                         variant='primary'
                                         className='w-100 mt-2'
-                                        disabled={isBooking}
+                                        disabled={isBooking || !travelDate || (availability && availability.availableSpots === 0)}
                                     >
                                         {isBooking ? 'Slanje...' : 'Potvrdi rezervaciju'}
                                     </Button>

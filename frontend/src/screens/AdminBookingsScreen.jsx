@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Badge, Row, Col, Button } from 'react-bootstrap';
-import { FaCheck, FaTimes, FaTrash, FaCalendarAlt, FaUsers, FaSyncAlt } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaTrash, FaCalendarAlt, FaUsers, FaSyncAlt, FaList, FaHistory } from 'react-icons/fa';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { toast } from 'react-toastify';
@@ -13,6 +14,8 @@ import {
 } from '../slices/bookingsApiSlice';
 
 const AdminBookingsScreen = () => {
+    const [activeTab, setActiveTab] = useState('current');
+
     const { data: bookings, isLoading, error, refetch } = useGetBookingsQuery();
     const [confirmBooking] = useConfirmBookingMutation();
     const [cancelBooking] = useCancelBookingMutation();
@@ -64,7 +67,7 @@ const AdminBookingsScreen = () => {
     const deleteHandler = async (bookingId) => {
         toast(
             <div>
-                <p className='mb-2'>Obrisati ovu rezervaciju trajno?</p>
+                <p className='mb-2'>Obrisati ovu rezervaciju trajno? Biće obrisana i iz istorije korisnika.</p>
                 <div className='d-flex gap-2'>
                     <button
                         className='btn btn-danger btn-sm'
@@ -110,16 +113,23 @@ const AdminBookingsScreen = () => {
         return <Badge bg='warning' text='dark'>Na čekanju</Badge>;
     };
 
+    const currentBookings = bookings?.filter(
+        (b) => b.status === 'pending' || b.status === 'confirmed'
+    ) || [];
+
+    const historyBookings = bookings?.filter(
+        (b) => b.status === 'cancelled' || b.status === 'completed'
+    ) || [];
+
+    const displayedBookings = activeTab === 'current' ? currentBookings : historyBookings;
+
     return (
         <>
             <Row className='align-items-center mb-4'>
                 <Col>
                     <h1>Upravljanje rezervacijama</h1>
                 </Col>
-                <Col className='text-end d-flex gap-2 justify-content-end align-items-center'>
-                    <span className='text-muted'>
-                        Ukupno: <strong>{bookings?.length || 0}</strong>
-                    </span>
+                <Col className='text-end'>
                     <Button
                         variant='outline-info'
                         size='sm'
@@ -131,14 +141,41 @@ const AdminBookingsScreen = () => {
                 </Col>
             </Row>
 
+            <div className='bookings-tabs mb-4'>
+                <button
+                    className={`bookings-tab-btn ${activeTab === 'current' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('current')}
+                >
+                    <FaList className='me-2' />
+                    Tekuće rezervacije
+                    {currentBookings.length > 0 && (
+                        <span className='bookings-tab-count'>{currentBookings.length}</span>
+                    )}
+                </button>
+                <button
+                    className={`bookings-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('history')}
+                >
+                    <FaHistory className='me-2' />
+                    Istorija
+                    {historyBookings.length > 0 && (
+                        <span className='bookings-tab-count'>{historyBookings.length}</span>
+                    )}
+                </button>
+            </div>
+
             {isLoading ? (
                 <Loader />
             ) : error ? (
                 <Message variant='danger'>
                     {error?.data?.message || error.error}
                 </Message>
-            ) : bookings.length === 0 ? (
-                <Message>Nema rezervacija u sistemu.</Message>
+            ) : displayedBookings.length === 0 ? (
+                <Message>
+                    {activeTab === 'current'
+                        ? 'Nema tekućih rezervacija.'
+                        : 'Istorija je prazna.'}
+                </Message>
             ) : (
                 <div className='admin-table-wrapper'>
                     <table className='table admin-table'>
@@ -154,7 +191,7 @@ const AdminBookingsScreen = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {bookings.map((booking) => (
+                            {displayedBookings.map((booking) => (
                                 <tr key={booking._id}>
                                     <td>
                                         <div className='d-flex align-items-center gap-2'>

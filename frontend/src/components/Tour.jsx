@@ -28,7 +28,10 @@ const Tour = ({ tour }) => {
                 </Card.Text>
                 <Badge bg='primary' className='mb-2'>{tour.category}</Badge>
                 <div className='tour-price mt-2'>{tour.price.toLocaleString('sr-RS')} RSD</div>
-                <Rating value={tour.rating} text={`${tour.numReviews} recenzija`} />
+                <Rating
+                    value={tour.rating}
+                    text={tour.numReviews > 0 ? `(${tour.numReviews})` : 'Nema ocena'}
+                />
             </Card.Body>
         </Card>
     );

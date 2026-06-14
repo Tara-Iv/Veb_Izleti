@@ -24,7 +24,6 @@ const AdminTourEditScreen = () => {
     const [duration, setDuration] = useState(1);
     const [price, setPrice] = useState(0);
     const [maxGroupSize, setMaxGroupSize] = useState(10);
-    const [availableSpots, setAvailableSpots] = useState(10);
     const [available, setAvailable] = useState(true);
 
     const { data: tour, isLoading, error } = useGetTourDetailsQuery(id, {
@@ -45,7 +44,6 @@ const AdminTourEditScreen = () => {
             setDuration(tour.duration);
             setPrice(tour.price);
             setMaxGroupSize(tour.maxGroupSize);
-            setAvailableSpots(tour.availableSpots);
             setAvailable(tour.available);
         }
     }, [tour]);
@@ -58,14 +56,14 @@ const AdminTourEditScreen = () => {
                     _id: id,
                     name, image, description, country, location,
                     category, duration, price, maxGroupSize,
-                    availableSpots, available,
+                    available,
                 }).unwrap();
                 toast.success('Izlet uspešno ažuriran.');
             } else {
                 await createTour({
                     name, image, description, country, location,
                     category, duration, price, maxGroupSize,
-                    availableSpots, available,
+                    available,
                 }).unwrap();
                 toast.success('Izlet uspešno dodat.');
             }
@@ -202,17 +200,6 @@ const AdminTourEditScreen = () => {
                                     min={1}
                                     value={maxGroupSize}
                                     onChange={(e) => setMaxGroupSize(Number(e.target.value))}
-                                    className='profile-input'
-                                />
-                            </Form.Group>
-
-                            <Form.Group controlId='availableSpots' className='mb-3'>
-                                <Form.Label>Slobodna mesta</Form.Label>
-                                <Form.Control
-                                    type='number'
-                                    min={0}
-                                    value={availableSpots}
-                                    onChange={(e) => setAvailableSpots(Number(e.target.value))}
                                     className='profile-input'
                                 />
                             </Form.Group>

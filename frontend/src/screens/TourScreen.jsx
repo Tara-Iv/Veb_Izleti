@@ -45,6 +45,7 @@ const TourScreen = () => {
                     {error?.data?.message || error.error}
                 </Message>
             ) : (
+                <>
                 <Row>
                     <Col md={7}>
                         <div className='tour-detail-img-wrapper'>
@@ -60,7 +61,11 @@ const TourScreen = () => {
                             <ListGroup.Item>
                                 <Rating
                                     value={tour.rating}
-                                    text={`${tour.numReviews} recenzija`}
+                                    text={
+                                        tour.numReviews > 0
+                                            ? `${tour.numReviews} ${tour.numReviews === 1 ? 'recenzija' : 'recenzije'}`
+                                            : 'Još nema recenzija'
+                                    }
                                 />
                             </ListGroup.Item>
                             <ListGroup.Item>
@@ -73,7 +78,7 @@ const TourScreen = () => {
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <FaUsers className='text-secondary me-2' />
-                                Slobodna mesta: {tour.availableSpots} / {tour.maxGroupSize}
+                                Maksimalna veličina grupe: {tour.maxGroupSize}
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <p>{tour.description}</p>
@@ -95,9 +100,9 @@ const TourScreen = () => {
                                     className='w-100'
                                     variant='primary'
                                     onClick={handleBooking}
-                                    disabled={!tour.available || tour.availableSpots === 0}
+                                    disabled={!tour.available}
                                 >
-                                    {!tour.available || tour.availableSpots === 0
+                                    {!tour.available
                                         ? 'Nije dostupno'
                                         : userInfo
                                             ? 'Rezerviši mesto'
@@ -107,6 +112,34 @@ const TourScreen = () => {
                         </Card>
                     </Col>
                 </Row>
+                <Row className='mt-5'>
+                    <Col md={12}>
+                        <h3 className='mb-4'>Recenzije</h3>
+                        {tour.reviews && tour.reviews.length > 0 ? (
+                            tour.reviews.map((review) => (
+                                <Card key={review._id} className='mb-3 review-card'>
+                                    <Card.Body>
+                                        <div className='d-flex justify-content-between align-items-start mb-2'>
+                                            <strong>{review.name}</strong>
+                                            <small className='text-muted'>
+                                                {new Date(review.createdAt).toLocaleDateString('sr-RS')}
+                                            </small>
+                                        </div>
+                                        <Rating value={review.rating} />
+                                        {review.comment && (
+                                            <p className='mt-2 mb-0 text-muted'>{review.comment}</p>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            ))
+                        ) : (
+                            <Message>
+                                Još nema recenzija za ovaj izlet. Budite prvi koji će ga oceniti!
+                            </Message>
+                        )}
+                    </Col>
+                </Row>
+                </>
             )}
         </>
     );
