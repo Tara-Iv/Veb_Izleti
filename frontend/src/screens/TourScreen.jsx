@@ -20,12 +20,12 @@ const TourScreen = () => {
     const { data: tour, isLoading, error } = useGetTourDetailsQuery(id);
 
     const handleBooking = () => {
-        if (userInfo) {
-            navigate(`/booking/${tour._id}`);
-        } else {
-            navigate('/login');
-        }
-    };
+    if (userInfo) {
+        navigate(`/booking/${tour._id}`);
+    } else {
+        navigate(`/login?redirect=/booking/${tour._id}`);
+    }
+};
 
     return (
         <>

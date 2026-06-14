@@ -5,7 +5,7 @@
 //Outlet je mesto gde se ubacuju child komponente (npr. HomeScreen, LoginScreen, itd.)
 //ToastContainer - komponenta koja prikazuje obavestenja 
 
-
+import ScrollToTop from './components/ScrollToTop';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -28,6 +28,7 @@ const App = () => {
 
     return (
         <>
+            <ScrollToTop />
             <Header />
             <main>
                 {isAuthPage ? (

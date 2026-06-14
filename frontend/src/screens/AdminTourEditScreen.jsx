@@ -19,6 +19,9 @@ const AdminTourEditScreen = () => {
     const [image, setImage] = useState('');
     const [description, setDescription] = useState('');
     const [country, setCountry] = useState('');
+    const [isCustomCountry, setIsCustomCountry] = useState(false);
+    const [customCountry, setCustomCountry] = useState('');
+    const predefinedCountries = ['Italija', 'Španija', 'Francuska', 'Grčka'];
     const [location, setLocation] = useState('');
     const [category, setCategory] = useState('');
     const [duration, setDuration] = useState(1);
@@ -38,7 +41,14 @@ const AdminTourEditScreen = () => {
             setName(tour.name);
             setImage(tour.image);
             setDescription(tour.description);
-            setCountry(tour.country);
+            if (predefinedCountries.includes(tour.country)) {
+                setCountry(tour.country);
+                setIsCustomCountry(false);
+            } else {
+                setCountry('__other__');
+                setCustomCountry(tour.country);
+                setIsCustomCountry(true);
+            }
             setLocation(tour.location);
             setCategory(tour.category);
             setDuration(tour.duration);
@@ -49,19 +59,32 @@ const AdminTourEditScreen = () => {
     }, [tour]);
 
     const submitHandler = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
+
+    const finalCountry = isCustomCountry ? customCountry.trim() : country;
+
+    if (!finalCountry) {
+        toast.error('Molimo unesite ili izaberite državu.');
+        return;
+    }
+
+    if (!name || !image || !description || !location || !category) {
+        toast.error('Popunite sva polja.');
+        return;
+    }
+
         try {
             if (isEditing) {
                 await updateTour({
                     _id: id,
-                    name, image, description, country, location,
+                    name, image, description, country: finalCountry, location,
                     category, duration, price, maxGroupSize,
                     available,
                 }).unwrap();
                 toast.success('Izlet uspešno ažuriran.');
             } else {
                 await createTour({
-                    name, image, description, country, location,
+                    name, image, description, country: finalCountry, location,
                     category, duration, price, maxGroupSize,
                     available,
                 }).unwrap();
@@ -131,7 +154,11 @@ const AdminTourEditScreen = () => {
                                 <Form.Label>Država</Form.Label>
                                 <Form.Select
                                     value={country}
-                                    onChange={(e) => setCountry(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setCountry(value);
+                                        setIsCustomCountry(value === '__other__');
+                                    }}
                                     className='profile-input'
                                 >
                                     <option value=''>Izaberite državu</option>
@@ -139,7 +166,17 @@ const AdminTourEditScreen = () => {
                                     <option value='Španija'>Španija</option>
                                     <option value='Francuska'>Francuska</option>
                                     <option value='Grčka'>Grčka</option>
+                                    <option value='__other__'>+ Dodaj novu državu</option>
                                 </Form.Select>
+                                {isCustomCountry && (
+                                    <Form.Control
+                                        type='text'
+                                        placeholder='Unesite naziv nove države'
+                                        value={customCountry}
+                                        onChange={(e) => setCustomCountry(e.target.value)}
+                                        className='profile-input mt-2'
+                                    />
+                                )}
                             </Form.Group>
 
                             <Form.Group controlId='location' className='mb-3'>
